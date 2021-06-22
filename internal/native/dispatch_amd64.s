@@ -53,3 +53,9 @@ TEXT ·Unquote(SB), NOSPLIT, $0 - 48
     JE   2(PC)
     JMP  github·com∕bytedance∕sonic∕internal∕native∕avx2·__unquote(SB)
     JMP  github·com∕bytedance∕sonic∕internal∕native∕avx·__unquote(SB)
+
+TEXT ·Search(SB), NOSPLIT, $0 - 48
+    CMPB github·com∕bytedance∕sonic∕internal∕cpu·HasAVX2(SB), $0
+    JE   2(PC)
+    JMP  github·com∕bytedance∕sonic∕internal∕native∕avx2·__search(SB)
+    JMP  github·com∕bytedance∕sonic∕internal∕native∕avx·__search(SB)

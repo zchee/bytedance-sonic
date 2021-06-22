@@ -42,4 +42,5 @@ var (
     S_skip_one    = _subr__skip_one
     S_skip_array  = _subr__skip_array
     S_skip_object = _subr__skip_object
+    S_search      = _subr__search
 )

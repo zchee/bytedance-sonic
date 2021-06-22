@@ -166,14 +166,16 @@ static inline size_t strchr2_avx2(__m256i v0, uint64_t c0, uint64_t c1) {
 #endif
 
 #define is_quote(c) ((c) == '"' || (c) == '\\' || ((c) >= 0 && (c) <= 31))
-#define is_space(c) ((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) == '\r')
+
+const int64_t _SPACE_MASK = (1ll << ' ') | (1ll << '\t') | (1ll << '\r') | (1ll << '\n');
+#define is_space(c) (((1ll << c) & _SPACE_MASK) != 0)
 
 static inline size_t lspace_p(const char *s, size_t nb) {
 #if USE_SSE
     do_simd(lspace)
 #else
     size_t i = 0;
-    while (i < nb && !is_space(s[i])) i++;
+    while (i < nb && is_space(s[i])) i++;
     return i;
 #endif
 }
@@ -461,6 +463,10 @@ size_t lzero(const char *p, size_t n) {
     } else {
         return *p != 0;
     }
+}
+
+size_t lspace_inline(const char *sp, size_t nb, size_t p) {
+    return lspace_p(sp + p, nb - p) + p;
 }
 
 size_t lquote(const GoString *s, size_t p) {

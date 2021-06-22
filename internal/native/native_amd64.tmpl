@@ -96,3 +96,8 @@ func __skip_object(s *string, p *int, m *types.StateMachine) (ret int)
 //go:noescape
 //goland:noinspection GoUnusedParameter
 func __unquote(s unsafe.Pointer, nb int, dp unsafe.Pointer, ep *int, flags uint64) (ret int)
+
+//go:nosplit
+//go:noescape
+//goland:noinspection GoUnusedParameter
+func __search(s *string, ps unsafe.Pointer, buf unsafe.Pointer, p *int, m *types.StateMachine) (ret int)

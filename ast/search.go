@@ -18,9 +18,10 @@ package ast
 
 import (
     `fmt`
-
+    `unsafe`    
+    
     `github.com/bytedance/sonic/internal/native/types`
-    `github.com/bytedance/sonic/unquote`
+    `github.com/bytedance/sonic/internal/rt`
 )
 
 type Searcher struct {
@@ -40,27 +41,34 @@ func (self *Searcher) GetByPath(path ...interface{}) (Node, error) {
     self.parser.p = 0
 
     var err types.ParsingError
+    var sp = make([]types.SearchPath, 0, len(path))
+    var maxBuf = 0
     for _, p := range path {
-        switch p.(type) {
+        switch t := p.(type) {
         case int:
-            start := self.parser.p
-            if err = self.parser.searchIndex(p.(int)); err != 0 {
-                return Node{}, self.parser.ExportError(err, start)
-            }
+            sp = append(sp, types.SearchPath{Vs: nil, Vi: int64(t)})
         case string:
-            start := self.parser.p
-            if err = self.parser.searchKey(p.(string)); err != 0 {
-                return Node{}, self.parser.ExportError(err, start)
+            nk := len(t)
+            if nk > maxBuf {
+                maxBuf = nk
             }
+            sp = append(sp, types.SearchPath{Vs: str2ptr(t), Vi: int64(-nk-1)})
         default:
             panic("path must be either int or string")
         }
     }
 
-    var start int
-    if start, err = self.parser.skip(); err != 0 {
-        return Node{}, self.parser.ExportError(err, start)
+    psp := ((*rt.GoSlice)(unsafe.Pointer(&sp)))
+    ps := types.Paths{Ps: psp.Ptr, Len: uint32(psp.Len)}
+    // NOTICE: UTF-8 escaping enlarges a char to at most six chars
+    buf := make([]byte, maxBuf * 6)
+    
+    old := self.parser.p
+    start, err := self.parser.search(ps, buf)
+    if err != 0 {
+        return Node{}, self.parser.ExportError(err, old)
     }
+
     ns := len(self.parser.s)
     if self.parser.p > ns || start >= ns {
         return Node{}, fmt.Errorf("skip %d char out of json boundary", start)
@@ -74,120 +82,158 @@ func (self *Searcher) GetByPath(path ...interface{}) (Node, error) {
     return newRawNode(self.parser.s[start:self.parser.p], t), nil
 }
 
-func (self *Parser) searchKey(match string) types.ParsingError {
-    ns := len(self.s)
-    if err := self.object(); err != 0 {
-        return err
-    }
+// func (self *Searcher) GetByPath2(path ...interface{}) (Node, error) {
+//     self.parser.p = 0
 
-    /* check for EOF */
-    if self.p = self.lspace(self.p); self.p >= ns {
-        return types.ERR_EOF
-    }
+//     var err types.ParsingError
+//     for _, p := range path {
+//         switch p.(type) {
+//         case int:
+//             start := self.parser.p
+//             if err = self.parser.searchIndex(p.(int)); err != 0 {
+//                 return Node{}, self.parser.ExportError(err, start)
+//             }
+//         case string:
+//             start := self.parser.p
+//             if err = self.parser.searchKey(p.(string)); err != 0 {
+//                 return Node{}, self.parser.ExportError(err, start)
+//             }
+//         default:
+//             panic("path must be either int or string")
+//         }
+//     }
 
-    /* check for empty object */
-    if self.s[self.p] == '}' {
-        self.p++
-        return _ERR_NOT_FOUND
-    }
+//     var start int
+//     if start, err = self.parser.skip(); err != 0 {
+//         return Node{}, self.parser.ExportError(err, start)
+//     }
+//     ns := len(self.parser.s)
+//     if self.parser.p > ns || start >= ns {
+//         return Node{}, fmt.Errorf("skip %d char out of json boundary", start)
+//     }
 
-    var njs types.JsonState
-    var err types.ParsingError
-    /* decode each pair */
-    for {
+//     t := switchRawType(self.parser.s[start])
+//     if t == _V_NONE {
+//         return Node{}, self.parser.ExportError(err, start)
+//     }
 
-        /* decode the key */
-        if njs = self.decodeValue(); njs.Vt != types.V_STRING {
-            return types.ERR_INVALID_CHAR
-        }
+//     return newRawNode(self.parser.s[start:self.parser.p], t), nil
+// }
 
-        /* extract the key */
-        idx := self.p - 1
-        key := self.s[njs.Iv:idx]
+// func (self *Parser) searchKey(match string) types.ParsingError {
+//     ns := len(self.s)
+//     if err := self.object(); err != 0 {
+//         return err
+//     }
 
-        /* check for escape sequence */
-        if njs.Ep != -1 {
-            if key, err = unquote.String(key); err != 0 {
-                return err
-            }
-        }
+//     /* check for EOF */
+//     if self.p = self.lspace(self.p); self.p >= ns {
+//         return types.ERR_EOF
+//     }
 
-        /* expect a ':' delimiter */
-        if err = self.delim(); err != 0 {
-            return err
-        }
+//     /* check for empty object */
+//     if self.s[self.p] == '}' {
+//         self.p++
+//         return _ERR_NOT_FOUND
+//     }
 
-        /* skip value */
-        if key != match {
-            if _, err = self.skip(); err != 0 {
-                return err
-            }
-        } else {
-            return 0
-        }
+//     var njs types.JsonState
+//     var err types.ParsingError
+//     /* decode each pair */
+//     for {
 
-        /* check for EOF */
-        self.p = self.lspace(self.p)
-        if self.p >= ns {
-            return types.ERR_EOF
-        }
+//         /* decode the key */
+//         if njs = self.decodeValue(); njs.Vt != types.V_STRING {
+//             return types.ERR_INVALID_CHAR
+//         }
 
-        /* check for the next character */
-        switch self.s[self.p] {
-        case ',':
-            self.p++
-        case '}':
-            self.p++
-            return _ERR_NOT_FOUND
-        default:
-            return types.ERR_INVALID_CHAR
-        }
-    }
-}
+//         /* extract the key */
+//         idx := self.p - 1
+//         key := self.s[njs.Iv:idx]
 
-func (self *Parser) searchIndex(idx int) types.ParsingError {
-    ns := len(self.s)
-    if err := self.array(); err != 0 {
-        return err
-    }
+//         /* check for escape sequence */
+//         if njs.Ep != -1 {
+//             if key, err = unquote.String(key); err != 0 {
+//                 return err
+//             }
+//         }
 
-    /* check for EOF */
-    if self.p = self.lspace(self.p); self.p >= ns {
-        return types.ERR_EOF
-    }
+//         /* expect a ':' delimiter */
+//         if err = self.delim(); err != 0 {
+//             return err
+//         }
 
-    /* check for empty array */
-    if self.s[self.p] == ']' {
-        self.p++
-        return _ERR_NOT_FOUND
-    }
+//         /* skip value */
+//         if key != match {
+//             if _, err = self.skip(); err != 0 {
+//                 return err
+//             }
+//         } else {
+//             return 0
+//         }
 
-    var err types.ParsingError
-    /* allocate array space and parse every element */
-    for i := 0; i < idx; i++ {
+//         /* check for EOF */
+//         self.p = self.lspace(self.p)
+//         if self.p >= ns {
+//             return types.ERR_EOF
+//         }
 
-        /* decode the value */
-        if _, err = self.skip(); err != 0 {
-            return err
-        }
+//         /* check for the next character */
+//         switch self.s[self.p] {
+//         case ',':
+//             self.p++
+//         case '}':
+//             self.p++
+//             return _ERR_NOT_FOUND
+//         default:
+//             return types.ERR_INVALID_CHAR
+//         }
+//     }
+// }
 
-        /* check for EOF */
-        self.p = self.lspace(self.p)
-        if self.p >= ns {
-            return types.ERR_EOF
-        }
+// func (self *Parser) searchIndex(idx int) types.ParsingError {
+//     ns := len(self.s)
+//     if err := self.array(); err != 0 {
+//         return err
+//     }
 
-        /* check for the next character */
-        switch self.s[self.p] {
-        case ',':
-            self.p++
-        case ']':
-            self.p++
-            return _ERR_NOT_FOUND
-        default:
-            return types.ERR_INVALID_CHAR
-        }
-    }
+//     /* check for EOF */
+//     if self.p = self.lspace(self.p); self.p >= ns {
+//         return types.ERR_EOF
+//     }
 
-    return 0
-}
+//     /* check for empty array */
+//     if self.s[self.p] == ']' {
+//         self.p++
+//         return _ERR_NOT_FOUND
+//     }
+
+//     var err types.ParsingError
+//     /* allocate array space and parse every element */
+//     for i := 0; i < idx; i++ {
+
+//         /* decode the value */
+//         if _, err = self.skip(); err != 0 {
+//             return err
+//         }
+
+//         /* check for EOF */
+//         self.p = self.lspace(self.p)
+//         if self.p >= ns {
+//             return types.ERR_EOF
+//         }
+
+//         /* check for the next character */
+//         switch self.s[self.p] {
+//         case ',':
+//             self.p++
+//         case ']':
+//             self.p++
+//             return _ERR_NOT_FOUND
+//         default:
+//             return types.ERR_INVALID_CHAR
+//         }
+//     }
+
+//     return 0
+// }

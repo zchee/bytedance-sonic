@@ -17,7 +17,8 @@
 package types
 
 import (
-    `fmt`
+	"fmt"
+	"unsafe"
 )
 
 type ValueType int
@@ -63,6 +64,7 @@ const (
     ERR_INTEGER_OVERFLOW   ParsingError = 5
     ERR_INVALID_NUMBER_FMT ParsingError = 6
     ERR_RECURSE_EXCEED_MAX ParsingError = 7
+    ERR_NOT_FOUND          ParsingError = 8
 )
 
 var _ParsingErrors = []string{
@@ -74,6 +76,7 @@ var _ParsingErrors = []string{
     ERR_INTEGER_OVERFLOW   : "integer overflow",
     ERR_INVALID_NUMBER_FMT : "invalid number format",
     ERR_RECURSE_EXCEED_MAX : "recursion exceeded max depth",
+    ERR_NOT_FOUND          : "not found",
 }
 
 func (self ParsingError) Error() string {
@@ -98,4 +101,14 @@ type JsonState struct {
 type StateMachine struct {
     Sp int
     Vt [MAX_RECURSE]int
+}
+
+type Paths struct {
+    Ps  unsafe.Pointer
+    Len uint32
+}
+
+type SearchPath struct {
+    Vs unsafe.Pointer
+    Vi int64
 }

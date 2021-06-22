@@ -46,6 +46,7 @@ var (
     S_skip_one    uintptr
     S_skip_array  uintptr
     S_skip_object uintptr
+    S_search      uintptr
 )
 
 //go:nosplit
@@ -78,6 +79,11 @@ func SkipOne(s *string, p *int, m *types.StateMachine) int
 //goland:noinspection GoUnusedParameter
 func Unquote(s unsafe.Pointer, nb int, dp unsafe.Pointer, ep *int, flags uint64) int
 
+//go:nosplit
+//go:noescape
+//goland:noinspection GoUnusedParameter
+func Search(s *string, ps *types.Paths, buf *[]byte, p *int, m *types.StateMachine) (ret int)
+
 func useAVX() {
     S_f64toa      = avx.S_f64toa
     S_i64toa      = avx.S_i64toa
@@ -93,6 +99,7 @@ func useAVX() {
     S_skip_one    = avx.S_skip_one
     S_skip_array  = avx.S_skip_array
     S_skip_object = avx.S_skip_object
+    S_search      = avx.S_search
 }
 
 func useAVX2() {
@@ -110,6 +117,7 @@ func useAVX2() {
     S_skip_one    = avx2.S_skip_one
     S_skip_array  = avx2.S_skip_array
     S_skip_object = avx2.S_skip_object
+    S_search      = avx2.S_search
 }
 
 func init() {

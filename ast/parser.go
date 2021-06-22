@@ -29,7 +29,7 @@ import (
 
 const _DEFAULT_NODE_CAP int = 16
 
-const _ERR_NOT_FOUND types.ParsingError = 33
+// const _ERR_NOT_FOUND types.ParsingError = 33
 
 type Parser struct {
     p           int
@@ -39,7 +39,7 @@ type Parser struct {
 }
 
 var stackPool = sync.Pool{
-    New: func()interface{}{
+    New: func() interface{} {
         return &types.StateMachine{}
     },
 }
@@ -326,6 +326,18 @@ func (self *Parser) skip() (int, types.ParsingError) {
     return start, 0
 }
 
+func (self *Parser) search(ps types.Paths, buf []byte) (int, types.ParsingError) {
+    fsm := stackPool.Get().(*types.StateMachine)
+    ret := native.Search(&self.s, &ps, &buf, &self.p, fsm)
+    stackPool.Put(fsm)
+    if ret < 0 {
+        // return error position
+        return self.p, types.ParsingError(-ret)
+    }
+    // return element start
+    return ret, 0
+}
+
 /** Parser Factory **/
 
 // Loads parse all json into interface{}
@@ -360,9 +372,6 @@ func NewParser(src string) *Parser {
 
 // ExportError converts types.ParsingError to std Error
 func (self *Parser) ExportError(err types.ParsingError, start int) error {
-    if err == _ERR_NOT_FOUND {
-        return fmt.Errorf("node not exists")
-    }
     return fmt.Errorf("%v at %d, near '%s'", err, self.p, self.printNear(start))
 }
 
@@ -370,7 +379,10 @@ func (self *Parser) printNear(start int) string {
     if start < 0 {
         start = 0
     }
-    end := self.p + 10
+    if self.p - start > 100 {
+        start = self.p - 100
+    }
+    end := self.p + 1
     if end > len(self.s) {
         end = len(self.s)
     }
