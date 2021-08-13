@@ -1,3 +1,4 @@
+//go:build !go1.15 || go1.17
 // +build !go1.15 go1.17
 
 /*
@@ -24,5 +25,5 @@ const (
 )
 
 func registerFunction(_ string, _ uintptr, _ int, _ int, _ uintptr) {
-    panic("Unsupported Go version. Supported versions are: 1.15, 1.16")
+	panic("Unsupported Go version. Supported versions are: 1.15, 1.16")
 }

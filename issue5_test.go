@@ -17,15 +17,15 @@
 package sonic
 
 import (
-    `testing`
+	"testing"
 
-    `github.com/stretchr/testify/require`
+	"github.com/stretchr/testify/require"
 )
 
 func TestIssue5(t *testing.T) {
-    var x int
-    var i interface{} = &x
-    err := Unmarshal([]byte(`1`), &i)
-    require.NoError(t, err)
-    require.Equal(t, 1, x)
+	var x int
+	var i interface{} = &x
+	err := Unmarshal([]byte(`1`), &i)
+	require.NoError(t, err)
+	require.Equal(t, 1, x)
 }

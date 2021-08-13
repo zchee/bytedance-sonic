@@ -17,22 +17,22 @@
 package sonic
 
 import (
-    "encoding/json"
-    "reflect"
-    "testing"
+	"encoding/json"
+	"reflect"
+	"testing"
 )
 
 func TestFloat(t *testing.T) {
-    data := `{"test":0.6666}`
-    var stdobj map[string]interface{}
-    if err := json.Unmarshal([]byte(data), &stdobj); err != nil {
-        t.Fatal(err)
-    }
-    var sonicobj map[string]interface{}
-    if err := Unmarshal([]byte(data), &sonicobj); err != nil {
-        t.Fatal(err)
-    }
-    if !reflect.DeepEqual(stdobj, sonicobj) {
-        t.Fatalf("exp: \n%#v, \ngot: \n%#v\n", stdobj, sonicobj)
-    }
+	data := `{"test":0.6666}`
+	var stdobj map[string]interface{}
+	if err := json.Unmarshal([]byte(data), &stdobj); err != nil {
+		t.Fatal(err)
+	}
+	var sonicobj map[string]interface{}
+	if err := Unmarshal([]byte(data), &sonicobj); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(stdobj, sonicobj) {
+		t.Fatalf("exp: \n%#v, \ngot: \n%#v\n", stdobj, sonicobj)
+	}
 }

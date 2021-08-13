@@ -17,95 +17,95 @@
 package sonic
 
 import (
-    `testing`
+	"testing"
 
-    `github.com/bytedance/sonic/decoder`
-    `github.com/stretchr/testify/require`
+	"github.com/bytedance/sonic/decoder"
+	"github.com/stretchr/testify/require"
 )
 
 type normalIfaceIssue39 interface {
-    Foo()
+	Foo()
 }
 
 type normalWrapIssue39 struct {
-    F normalIfaceIssue39
+	F normalIfaceIssue39
 }
 
 type normalImplIssue39 struct {
-    X int
+	X int
 }
 
 func (_ *normalImplIssue39) Foo() {}
 
 type jsonIfaceIssue39 interface {
-    UnmarshalJSON(b []byte) error
+	UnmarshalJSON(b []byte) error
 }
 
 type jsonWrapIssue39 struct {
-    F jsonIfaceIssue39
+	F jsonIfaceIssue39
 }
 
 type jsonImplIssue39 struct {
-    a string
+	a string
 }
 
-func (self *jsonImplIssue39) UnmarshalJSON(b []byte) error{
-    self.a = string(b)
-    return nil
+func (self *jsonImplIssue39) UnmarshalJSON(b []byte) error {
+	self.a = string(b)
+	return nil
 }
 
 type textIfaceIssue39 interface {
-    UnmarshalText(b []byte) error
+	UnmarshalText(b []byte) error
 }
 
 type textWrapIssue39 struct {
-    F textIfaceIssue39
+	F textIfaceIssue39
 }
 
 type textImplIssue39 struct {
-    a string
+	a string
 }
 
-func (self *textImplIssue39) UnmarshalText(b []byte) error{
-    self.a = string(b)
-    return nil
+func (self *textImplIssue39) UnmarshalText(b []byte) error {
+	self.a = string(b)
+	return nil
 }
 
 func TestIssue39_Iface(t *testing.T) {
-    p := new(normalImplIssue39)
-    obj := normalWrapIssue39{F: p}
-    err := Unmarshal([]byte(`{"F":{"X":123}}`), &obj)
-    if err != nil {
-        if v, ok := err.(decoder.SyntaxError); ok {
-            println(v.Description())
-        }
-        require.NoError(t, err)
-    }
-    require.Equal(t, 123, p.X)
+	p := new(normalImplIssue39)
+	obj := normalWrapIssue39{F: p}
+	err := Unmarshal([]byte(`{"F":{"X":123}}`), &obj)
+	if err != nil {
+		if v, ok := err.(decoder.SyntaxError); ok {
+			println(v.Description())
+		}
+		require.NoError(t, err)
+	}
+	require.Equal(t, 123, p.X)
 }
 
 func TestIssue39_UnmarshalJSON(t *testing.T) {
-    p := &jsonImplIssue39{}
-    obj := jsonWrapIssue39{F: p}
-    err := Unmarshal([]byte(`{"F":"xx"}`), &obj)
-    if err != nil {
-        if v, ok := err.(decoder.SyntaxError); ok {
-            println(v.Description())
-        }
-        require.NoError(t, err)
-    }
-    require.Equal(t, `"xx"`, p.a)
+	p := &jsonImplIssue39{}
+	obj := jsonWrapIssue39{F: p}
+	err := Unmarshal([]byte(`{"F":"xx"}`), &obj)
+	if err != nil {
+		if v, ok := err.(decoder.SyntaxError); ok {
+			println(v.Description())
+		}
+		require.NoError(t, err)
+	}
+	require.Equal(t, `"xx"`, p.a)
 }
 
 func TestIssue39_UnmarshalText(t *testing.T) {
-    p := &textImplIssue39{}
-    obj := textWrapIssue39{F: p}
-    err := Unmarshal([]byte(`{"F":"xx"}`), &obj)
-    if err != nil {
-        if v, ok := err.(decoder.SyntaxError); ok {
-            println(v.Description())
-        }
-        require.NoError(t, err)
-    }
-    require.Equal(t, `xx`, p.a)
+	p := &textImplIssue39{}
+	obj := textWrapIssue39{F: p}
+	err := Unmarshal([]byte(`{"F":"xx"}`), &obj)
+	if err != nil {
+		if v, ok := err.(decoder.SyntaxError); ok {
+			println(v.Description())
+		}
+		require.NoError(t, err)
+	}
+	require.Equal(t, `xx`, p.a)
 }

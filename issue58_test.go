@@ -17,25 +17,25 @@
 package sonic
 
 import (
-    `testing`
+	"testing"
 
-    `github.com/stretchr/testify/require`
+	"github.com/stretchr/testify/require"
 )
 
 type (
-    Issue58ValueReceiver   struct {}
-    Issue58PointerReceiver struct {}
+	Issue58ValueReceiver   struct{}
+	Issue58PointerReceiver struct{}
 )
 
 func (_ Issue58ValueReceiver) MarshalJSON() ([]byte, error)    { return []byte(`"value"`), nil }
 func (_ *Issue58PointerReceiver) MarshalJSON() ([]byte, error) { return []byte(`"pointer"`), nil }
 
 func TestIssue58_NilPointerOnValueMethod(t *testing.T) {
-    v := struct {
-        X *Issue58ValueReceiver
-        Y *Issue58PointerReceiver
-    }{}
-    buf, err := Marshal(v)
-    require.NoError(t, err)
-    require.Equal(t, []byte(`{"X":null,"Y":"pointer"}`), buf)
+	v := struct {
+		X *Issue58ValueReceiver
+		Y *Issue58PointerReceiver
+	}{}
+	buf, err := Marshal(v)
+	require.NoError(t, err)
+	require.Equal(t, []byte(`{"X":null,"Y":"pointer"}`), buf)
 }

@@ -17,20 +17,20 @@
 package sonic
 
 import (
-    `fmt`
-    `sync`
-    `testing`
+	"fmt"
+	"sync"
+	"testing"
 )
 
 func ExtractJson(idx int, body interface{}) {
-    j := []byte(exampleJson[idx])
+	j := []byte(exampleJson[idx])
 
-    // REPLACE sonic WITH json
-    err := Unmarshal(j, &body)
-    if err != nil {
-        fmt.Println(err.Error())
-        return
-    }
+	// REPLACE sonic WITH json
+	err := Unmarshal(j, &body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 }
 
 var exampleJson1 = `{}`
@@ -40,51 +40,51 @@ var exampleJson2 = `{}`
 var exampleJson = []string{exampleJson1, exampleJson2}
 
 type raceTestStruct struct {
-    f1 *[]raceTestStruct2 `json:"f1"`
-    f2 *int               `json:"f2"`
-    f3 *string            `json:"f3"`
-    f4 *string            `json:"f4"`
+	f1 *[]raceTestStruct2 `json:"f1"`
+	f2 *int               `json:"f2"`
+	f3 *string            `json:"f3"`
+	f4 *string            `json:"f4"`
 }
 type raceTestStruct2 struct {
-    g1 *string           `json:"g1"`
-    g2 *string           `json:"g2"`
-    g3 *string           `json:"g3"`
-    g4 []raceTestStruct3 `json:"g4"`
+	g1 *string           `json:"g1"`
+	g2 *string           `json:"g2"`
+	g3 *string           `json:"g3"`
+	g4 []raceTestStruct3 `json:"g4"`
 }
 type raceTestStruct3 struct {
-    e1 *string  `json:"e1"`
-    e2 *string  `json:"e2"`
-    e3 *float64 `json:"e3"`
-    e4 *float64 `json:"e4"`
+	e1 *string  `json:"e1"`
+	e2 *string  `json:"e2"`
+	e3 *float64 `json:"e3"`
+	e4 *float64 `json:"e4"`
 }
 
 func TestExtracJson(t *testing.T) {
 
-    wg := sync.WaitGroup{}
+	wg := sync.WaitGroup{}
 
-    resultChan := make(chan raceTestStruct, 2)
+	resultChan := make(chan raceTestStruct, 2)
 
-    wg.Add(1)
-    go func() {
-        defer wg.Done()
-        var model raceTestStruct
-        ExtractJson(0, &model)
-        resultChan <- model
-    }()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var model raceTestStruct
+		ExtractJson(0, &model)
+		resultChan <- model
+	}()
 
-    wg.Add(1)
-    go func() {
-        defer wg.Done()
-        var model raceTestStruct
-        ExtractJson(1, &model)
-        resultChan <- model
-    }()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var model raceTestStruct
+		ExtractJson(1, &model)
+		resultChan <- model
+	}()
 
-    var results []raceTestStruct
-    for i := 0; i < 2; i++ {
-        results = append(results, <-resultChan)
-    }
+	var results []raceTestStruct
+	for i := 0; i < 2; i++ {
+		results = append(results, <-resultChan)
+	}
 
-    wg.Wait()
-    close(resultChan)
+	wg.Wait()
+	close(resultChan)
 }

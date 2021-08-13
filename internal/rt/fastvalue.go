@@ -17,8 +17,8 @@
 package rt
 
 import (
-    `reflect`
-    `unsafe`
+	"reflect"
+	"unsafe"
 )
 
 var (
@@ -26,160 +26,160 @@ var (
 )
 
 const (
-    F_direct    = 1 << 5
-    F_kind_mask = (1 << 5) - 1
+	F_direct    = 1 << 5
+	F_kind_mask = (1 << 5) - 1
 )
 
 type GoType struct {
-    Size       uintptr
-    PtrData    uintptr
-    Hash       uint32
-    Flags      uint8
-    Align      uint8
-    FieldAlign uint8
-    KindFlags  uint8
-    Traits     unsafe.Pointer
-    GCData     *byte
-    Str        int32
-    PtrToSelf  int32
+	Size       uintptr
+	PtrData    uintptr
+	Hash       uint32
+	Flags      uint8
+	Align      uint8
+	FieldAlign uint8
+	KindFlags  uint8
+	Traits     unsafe.Pointer
+	GCData     *byte
+	Str        int32
+	PtrToSelf  int32
 }
 
 func (self *GoType) Kind() reflect.Kind {
-    return reflect.Kind(self.KindFlags & F_kind_mask)
+	return reflect.Kind(self.KindFlags & F_kind_mask)
 }
 
 func (self *GoType) Pack() (t reflect.Type) {
-    (*GoIface)(unsafe.Pointer(&t)).Itab = reflectRtypeItab
-    (*GoIface)(unsafe.Pointer(&t)).Value = unsafe.Pointer(self)
-    return
+	(*GoIface)(unsafe.Pointer(&t)).Itab = reflectRtypeItab
+	(*GoIface)(unsafe.Pointer(&t)).Value = unsafe.Pointer(self)
+	return
 }
 
 func (self *GoType) String() string {
-    return self.Pack().String()
+	return self.Pack().String()
 }
 
 type GoMap struct {
-    Count      int
-    Flags      uint8
-    B          uint8
-    Overflow   uint16
-    Hash0      uint32
-    Buckets    unsafe.Pointer
-    OldBuckets unsafe.Pointer
-    Evacuate   uintptr
-    Extra      unsafe.Pointer
+	Count      int
+	Flags      uint8
+	B          uint8
+	Overflow   uint16
+	Hash0      uint32
+	Buckets    unsafe.Pointer
+	OldBuckets unsafe.Pointer
+	Evacuate   uintptr
+	Extra      unsafe.Pointer
 }
 
 type GoMapIterator struct {
-    Key         unsafe.Pointer
-    Elem        unsafe.Pointer
-    T           *GoMapType
-    H           *GoMap
-    Buckets     unsafe.Pointer
-    Bptr        *unsafe.Pointer
-    Overflow    *[]unsafe.Pointer
-    OldOverflow *[]unsafe.Pointer
-    StartBucket uintptr
-    Offset      uint8
-    Wrapped     bool
-    B           uint8
-    I           uint8
-    Bucket      uintptr
-    CheckBucket uintptr
+	Key         unsafe.Pointer
+	Elem        unsafe.Pointer
+	T           *GoMapType
+	H           *GoMap
+	Buckets     unsafe.Pointer
+	Bptr        *unsafe.Pointer
+	Overflow    *[]unsafe.Pointer
+	OldOverflow *[]unsafe.Pointer
+	StartBucket uintptr
+	Offset      uint8
+	Wrapped     bool
+	B           uint8
+	I           uint8
+	Bucket      uintptr
+	CheckBucket uintptr
 }
 
 type GoItab struct {
-    it unsafe.Pointer
-    vt *GoType
-    hv uint32
-    _  [4]byte
-    fn [1]uintptr
+	it unsafe.Pointer
+	vt *GoType
+	hv uint32
+	_  [4]byte
+	fn [1]uintptr
 }
 
 type GoIface struct {
-    Itab  *GoItab
-    Value unsafe.Pointer
+	Itab  *GoItab
+	Value unsafe.Pointer
 }
 
 type GoEface struct {
-    Type  *GoType
-    Value unsafe.Pointer
+	Type  *GoType
+	Value unsafe.Pointer
 }
 
 func (self GoEface) Pack() (v interface{}) {
-    *(*GoEface)(unsafe.Pointer(&v)) = self
-    return
+	*(*GoEface)(unsafe.Pointer(&v)) = self
+	return
 }
 
 type GoPtrType struct {
-    GoType
-    Elem *GoType
+	GoType
+	Elem *GoType
 }
 
 type GoMapType struct {
-    GoType
-    Key        *GoType
-    Elem       *GoType
-    Bucket     *GoType
-    Hasher     func(unsafe.Pointer, uintptr) uintptr
-    KeySize    uint8
-    ElemSize   uint8
-    BucketSize uint16
-    Flags      uint32
+	GoType
+	Key        *GoType
+	Elem       *GoType
+	Bucket     *GoType
+	Hasher     func(unsafe.Pointer, uintptr) uintptr
+	KeySize    uint8
+	ElemSize   uint8
+	BucketSize uint16
+	Flags      uint32
 }
 
 func (self *GoMapType) IndirectElem() bool {
-    return self.Flags & 2 != 0
+	return self.Flags&2 != 0
 }
 
 type GoStructType struct {
-    GoType
-    Pkg    *byte
-    Fields []GoStructField
+	GoType
+	Pkg    *byte
+	Fields []GoStructField
 }
 
 type GoStructField struct {
-    Name     *byte
-    Type     *GoType
-    OffEmbed uintptr
+	Name     *byte
+	Type     *GoType
+	OffEmbed uintptr
 }
 
 type GoSlice struct {
-    Ptr unsafe.Pointer
-    Len int
-    Cap int
+	Ptr unsafe.Pointer
+	Len int
+	Cap int
 }
 
 type GoString struct {
-    Ptr unsafe.Pointer
-    Len int
+	Ptr unsafe.Pointer
+	Len int
 }
 
 func PtrElem(t *GoType) *GoType {
-    if t.Kind() != reflect.Ptr {
-        panic("not a pointer: " + t.String())
-    } else {
-        return (*GoPtrType)(unsafe.Pointer(t)).Elem
-    }
+	if t.Kind() != reflect.Ptr {
+		panic("not a pointer: " + t.String())
+	} else {
+		return (*GoPtrType)(unsafe.Pointer(t)).Elem
+	}
 }
 
 func MapType(t *GoType) *GoMapType {
-    if t.Kind() != reflect.Map {
-        panic("not a map: " + t.String())
-    } else {
-        return (*GoMapType)(unsafe.Pointer(t))
-    }
+	if t.Kind() != reflect.Map {
+		panic("not a map: " + t.String())
+	} else {
+		return (*GoMapType)(unsafe.Pointer(t))
+	}
 }
 
 func UnpackType(t reflect.Type) *GoType {
-    return (*GoType)((*GoIface)(unsafe.Pointer(&t)).Value)
+	return (*GoType)((*GoIface)(unsafe.Pointer(&t)).Value)
 }
 
 func UnpackEface(v interface{}) GoEface {
-    return *(*GoEface)(unsafe.Pointer(&v))
+	return *(*GoEface)(unsafe.Pointer(&v))
 }
 
 func findReflectRtypeItab() *GoItab {
-    v := reflect.TypeOf(struct{}{})
-    return (*GoIface)(unsafe.Pointer(&v)).Itab
+	v := reflect.TypeOf(struct{}{})
+	return (*GoIface)(unsafe.Pointer(&v)).Itab
 }
