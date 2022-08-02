@@ -1,4 +1,4 @@
-// +build !go1.15 go1.21
+// +build !go1.15 go1.22
 
 /*
  * Copyright 2021 ByteDance Inc.
@@ -24,5 +24,5 @@ const (
 )
 
 func registerFunction(_ string, _ uintptr, _ int, _ int, _ uintptr) {
-    panic("Unsupported Go version. Supported versions are: 1.15, 1.16, 1.17")
+	panic("Unsupported Go version. Supported versions are: 1.15, 1.16, 1.17")
 }
