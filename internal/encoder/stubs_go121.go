@@ -1,4 +1,4 @@
-// +build go1.20,!go1.21
+// +build go1.20,!go1.22
 
 /*
  * Copyright 2021 ByteDance Inc.
@@ -62,5 +62,5 @@ func memclrNoHeapPointers(ptr unsafe.Pointer, n uintptr)
 //go:linkname _runtime_writeBarrier runtime.writeBarrier
 var _runtime_writeBarrier uintptr
 
-//go:linkname gcWriteBarrierAX runtime.gcWriteBarrier
+//go:linkname gcWriteBarrierAX runtime.gcWriteBarrier1
 func gcWriteBarrierAX()

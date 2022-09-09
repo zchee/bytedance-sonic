@@ -1,4 +1,5 @@
-// +build go1.17,!go1.21
+//go:build go1.17 && !go1.22
+// +build go1.17,!go1.22
 
 /*
  * Copyright 2021 ByteDance Inc.
@@ -19,14 +20,14 @@
 package encoder
 
 import (
-    `fmt`
-    `os`
-    `runtime`
-    `strings`
-    `unsafe`
+	"fmt"
+	"os"
+	"runtime"
+	"strings"
+	"unsafe"
 
-    `github.com/bytedance/sonic/internal/jit`
-    `github.com/twitchyliquid64/golang-asm/obj`
+	"github.com/bytedance/sonic/internal/jit"
+	"github.com/twitchyliquid64/golang-asm/obj"
 )
 
 const _FP_debug = 128
