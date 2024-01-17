@@ -106,7 +106,7 @@ type GoMapIterator struct {
 }
 
 type GoItab struct {
-    it unsafe.Pointer
+    It unsafe.Pointer
     Vt *GoType
     hv uint32
     _  [4]byte
