@@ -1,7 +1,7 @@
-// +build go1.21,!go1.22
+// +build go1.22,!go1.23
 
 /*
- * Copyright 2021 ByteDance Inc.
+ * Copyright 2024 ByteDance Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,29 @@ func memmove(to unsafe.Pointer, from unsafe.Pointer, n uintptr)
 //goland:noinspection GoUnusedParameter
 func growslice(et *rt.GoType, old rt.GoSlice, cap int) rt.GoSlice
 
+// func assertI2I2(inter *interfacetype, i iface) (r iface)
+
+//go:linkname getitab runtime.getitab
+//goland:noinspection GoUnusedParameter
+func getitab(inter *rt.GoType, typ *rt.GoType, canfail bool) *rt.GoItab
+
 //go:linkname assertI2I runtime.assertI2I2
 //goland:noinspection GoUnusedParameter
-func assertI2I(inter *rt.GoType, i rt.GoIface) rt.GoIface
+func assertI2I(inter *rt.GoType, i rt.GoIface) (r rt.GoIface) {
+	tab := i.Itab
+	if tab == nil {
+		return
+	}
+	if (*rt.GoType)(tab.It) != inter {
+		tab = getitab(inter, tab.Vt, true)
+		if tab == nil {
+			return
+		}
+	}
+	r.Itab = tab
+	r.Value = i.Value
+	return
+}
 
 //go:linkname mapiternext runtime.mapiternext
 //goland:noinspection GoUnusedParameter
