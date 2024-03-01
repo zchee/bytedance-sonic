@@ -26,7 +26,7 @@ import (
     `github.com/bytedance/sonic/internal/jit`
     `github.com/bytedance/sonic/internal/native`
     `github.com/bytedance/sonic/internal/native/types`
-    `github.com/twitchyliquid64/golang-asm/obj`
+    `github.com/go-asm/go/cmd/obj`
 )
 
 /** Crucial Registers:

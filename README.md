@@ -383,7 +383,7 @@ For developers who want to use sonic on Linux arm64 without qemu, or those who w
 
 ### Pretouch
 
-Since Sonic uses [golang-asm](https://github.com/twitchyliquid64/golang-asm) as a JIT assembler, which is NOT very suitable for runtime compiling, first-hit running of a huge schema may cause request-timeout or even process-OOM. For better stability, we advise **using `Pretouch()` for huge-schema or compact-memory applications** before `Marshal()/Unmarshal()`.
+Since Sonic uses [golang-asm](https://github.com/go-asm/go/cmd/obj) as a JIT assembler, which is NOT very suitable for runtime compiling, first-hit running of a huge schema may cause request-timeout or even process-OOM. For better stability, we advise **using `Pretouch()` for huge-schema or compact-memory applications** before `Marshal()/Unmarshal()`.
 
 ```go
 import (

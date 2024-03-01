@@ -20,8 +20,8 @@ import (
     `testing`
 
     `github.com/davecgh/go-spew/spew`
-    `github.com/twitchyliquid64/golang-asm/obj`
-    `github.com/twitchyliquid64/golang-asm/obj/x86`
+    `github.com/go-asm/go/cmd/obj`
+    `github.com/go-asm/go/cmd/obj/x86`
 )
 
 func TestBackend(t *testing.T) {

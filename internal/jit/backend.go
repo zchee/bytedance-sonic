@@ -21,9 +21,9 @@ import (
     `sync`
     _ `unsafe`
 
-    `github.com/twitchyliquid64/golang-asm/asm/arch`
-    `github.com/twitchyliquid64/golang-asm/obj`
-    `github.com/twitchyliquid64/golang-asm/objabi`
+    `github.com/go-asm/go/cmd/asm/arch`
+    `github.com/go-asm/go/cmd/obj`
+    `github.com/go-asm/go/cmd/objabi`
 )
 
 type Backend struct {
@@ -57,7 +57,7 @@ func remProg(p *obj.Prog) *obj.Prog {
 
 func newBackend(name string) (ret *Backend) {
     ret      = new(Backend)
-    ret.Arch = arch.Set(name)
+    ret.Arch = arch.Set(name, false)
     ret.Ctxt = newLinkContext(ret.Arch.LinkArch)
     ret.Arch.Init(ret.Ctxt)
     return
@@ -111,7 +111,8 @@ func (self *Backend) Assemble() []byte {
     var fnv obj.FuncInfo
 
     /* construct the function */
-    sym.Func = &fnv
+	sym.Extra = new(interface{})
+	*sym.Extra = &fnv
     fnv.Text = self.Head
 
     /* call the assembler */

@@ -17,12 +17,12 @@
 package jit
 
 import (
-    `github.com/twitchyliquid64/golang-asm/asm/arch`
-    `github.com/twitchyliquid64/golang-asm/obj`
+    `github.com/go-asm/go/cmd/asm/arch`
+    `github.com/go-asm/go/cmd/obj`
 )
 
 var (
-    _AC = arch.Set("amd64")
+    _AC = arch.Set("amd64", false)
 )
 
 func As(op string) obj.As {

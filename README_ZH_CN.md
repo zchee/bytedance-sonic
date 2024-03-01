@@ -383,7 +383,7 @@ type Visitor interface {
 
 ### 预热
 
-由于 Sonic 使用 [golang-asm](https://github.com/twitchyliquid64/golang-asm) 作为 JIT 汇编器，这个库并不适用于运行时编译，第一次运行一个大型模式可能会导致请求超时甚至进程内存溢出。为了更好地稳定性，我们建议在运行大型模式或在内存有限的应用中，在使用 `Marshal()/Unmarshal()` 前运行 `Pretouch()`。
+由于 Sonic 使用 [golang-asm](https://github.com/go-asm/go/cmd/obj) 作为 JIT 汇编器，这个库并不适用于运行时编译，第一次运行一个大型模式可能会导致请求超时甚至进程内存溢出。为了更好地稳定性，我们建议在运行大型模式或在内存有限的应用中，在使用 `Marshal()/Unmarshal()` 前运行 `Pretouch()`。
 
 ```go
 import (

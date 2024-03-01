@@ -22,8 +22,8 @@ import (
 
     `github.com/bytedance/sonic/internal/jit`
     `github.com/bytedance/sonic/internal/rt`
-    `github.com/twitchyliquid64/golang-asm/obj`
-    `github.com/twitchyliquid64/golang-asm/obj/x86`
+    `github.com/go-asm/go/cmd/obj`
+    `github.com/go-asm/go/cmd/obj/x86`
 )
 
 var _runtime_writeBarrier uintptr = rt.GcwbAddr()

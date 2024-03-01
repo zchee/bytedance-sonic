@@ -26,7 +26,7 @@ import (
     `unsafe`
 
     `github.com/bytedance/sonic/internal/jit`
-    `github.com/twitchyliquid64/golang-asm/obj`
+    `github.com/go-asm/go/cmd/obj`
 )
 
 const _FP_debug = 128

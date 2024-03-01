@@ -21,7 +21,7 @@ import (
     `unsafe`
 
     `github.com/bytedance/sonic/internal/rt`
-    `github.com/twitchyliquid64/golang-asm/obj`
+    `github.com/go-asm/go/cmd/obj`
 )
 
 func Func(f interface{}) obj.Addr {

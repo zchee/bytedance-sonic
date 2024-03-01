@@ -24,8 +24,8 @@ import (
 
     `github.com/bytedance/sonic/loader`
     `github.com/bytedance/sonic/internal/rt`
-    `github.com/twitchyliquid64/golang-asm/obj`
-    `github.com/twitchyliquid64/golang-asm/obj/x86`
+    `github.com/go-asm/go/cmd/obj`
+    `github.com/go-asm/go/cmd/obj/x86`
 )
 
 const (
@@ -182,8 +182,8 @@ func (self *BaseAssembler) assignOperands(p *obj.Prog, args []obj.Addr) {
         case 0  :
         case 1  : p.To                     = args[0]
         case 2  : p.To, p.From             = args[1], args[0]
-        case 3  : p.To, p.From, p.RestArgs = args[2], args[0], args[1:2]
-        case 4  : p.To, p.From, p.RestArgs = args[2], args[3], args[:2]
+		case 3  : p.To, p.From, p.RestArgs = args[2], args[0], []obj.AddrPos{{Addr: args[1]},{Addr: args[2]}}
+        case 4  : p.To, p.From, p.RestArgs = args[2], args[3], []obj.AddrPos{{Addr: args[2]},{Addr: args[3]},{Addr: args[4]}}
         default : panic("invalid operands")
     }
 }
